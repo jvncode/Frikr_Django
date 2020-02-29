@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bienvenido a Frikr - Como Flicker, pero en friki</title>
+</head>
+<body>
+    <h1>Bienvenido a Frikr</h1>
+    <p>Frikr es como Flicker, pero en friki<p>
+    {% if photos_list|length > 0 %}
+        <h2>Últimas fotos publicadas</h2>
+
+        {% for photo in photos_list %}
+            <img src="{{ photo.url }}" alt="{{ photo.name }}" height="150">
+        {% endfor %}
+    {% else %}
+        <h2>No hay fotos publicadas</h2>
+    {% endif %}
+</body>
+</html>

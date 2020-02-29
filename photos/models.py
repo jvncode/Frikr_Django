@@ -18,4 +18,8 @@ class Photo(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
     license = models.CharField(max_length=3, choices=LICENSES)
 
+    def __str__(self):
+        return self.name
+
+
 
