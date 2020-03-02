@@ -121,3 +121,18 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# LOGIN URL
+LOGIN_URL = '/login'  #cuando un usuario no esté autenticado le redirige a /login
+
+# LICENSES
+LICENSES = (
+    ('QUE', 'Quentin Tarantino'),
+    ('DSH', 'Dr. Schutlz')
+)
+
+# BADWORDS http://goo.gl/G2nCu7
+PROJECT_BADWORDS = ['Abollao','Abrazafarolas','Afilasables','Analfabestia','Apollardao','Arrastramantas', 'Caracartón']
+
+
+

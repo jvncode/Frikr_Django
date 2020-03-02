@@ -3,12 +3,13 @@ from django.shortcuts import render
 from photos.forms import PhotoForm
 from photos.models import Photo, PUBLIC
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
 def home(request):
     """
     Esta función devuelve el home de mi pagina
     """
-    photos = Photo.objects.filter(visibility=PUBLIC, owner='1').order_by('-created_at') #Con order_by hacemos que ordene la consulta con la fecha de creacion
+    photos = Photo.objects.filter(visibility=PUBLIC).order_by('-created_at') #Con order_by hacemos que ordene la consulta con la fecha de creacion
     context = {
         'photos_list': photos[:5]
     }
@@ -41,6 +42,7 @@ def detail(request, pk):
     else:
         return HttpResponseNotFound('No existe la foto')  # 404 Not found
 
+@login_required()
 def create(request):
     """
     Muestra un formulario para crear una foto y la crea si la petición es POST
@@ -51,7 +53,9 @@ def create(request):
     if request.method == 'GET':
         form = PhotoForm()
     else:
-        form = PhotoForm(request.POST)
+        photo_with_owner = Photo()
+        photo_with_owner.owner = request.user #asigno como propietario de la foto, al usuario autenticado
+        form = PhotoForm(request.POST, instance=photo_with_owner)
         if form.is_valid():
             new_photo = form.save()  # Guarda el objeto Photo y me lo devuelve
             form = PhotoForm()
