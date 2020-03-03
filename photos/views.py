@@ -6,7 +6,19 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.views.generic import View
 from django.utils.decorators import method_decorator
+from django.db.models import Q
 
+
+class PhotosQueryset(object):
+
+    def get_photos_queryset(self, request):
+        if not request.user.is_authenticated:  # Si usuario no está autenticado
+            photos = Photo.objects.filter(visibility=PUBLIC)
+        elif request.user.is_superuser:   #Si usuario es administrador
+            photos = Photo.objects.all()
+        else:  #Si usuario está autenticado
+            photos = Photo.objects.filter(Q(owner=request.user) | Q(visibility=PUBLIC))
+        return photos
 
 class HomeView(View):  #Vista basada en una clase. Los GET y POST se definen en métodos/funciones.
     def get(self, request):
@@ -19,7 +31,7 @@ class HomeView(View):  #Vista basada en una clase. Los GET y POST se definen en 
         }
         return render(request, 'photos/home.html', context)
 
-class DetailView(View):
+class DetailView(View, PhotosQueryset):
     def get(self, request, pk):
         """
         Carga la página de detalle de una foto
@@ -36,7 +48,7 @@ class DetailView(View):
         except PhotoMultipleObjects:
             photo = None
         """
-        possible_photos = Photo.objects.filter(pk=pk).select_related('owner') #con 'select_related() añadimos al select de búsqueda en BBDD los campos que queremos traer para optimizar la query
+        possible_photos = self.get_photos_queryset(request).filter(pk=pk).select_related('owner') #con 'select_related() añadimos al select de búsqueda en BBDD los campos que queremos traer para optimizar la query
         photo = possible_photos[0] if len(possible_photos) >= 1 else None
         if photo is not None:
             #cargar la pagina de detalle
@@ -85,3 +97,19 @@ class CreateView(View):
             'success_message': success_message
         }
         return render(request, 'photos/new_photo.html', context)
+
+class ListView(View, PhotosQueryset):
+    def get(self, request):
+        """
+        Devuelve:
+        - Las fotos públicas si el usuario no está autenticado
+        - Las fotos del usuario auténticado y las públicas de otros
+        - Si el usuario es superadministrador, todas las fotos
+        :param HttpRequest
+        :return: HttpResponse
+        """
+        context = {
+            'photos': self.get_photos_queryset(request)
+        }
+        return render(request, 'photos/photos_list.html', context)
+
