@@ -1,4 +1,4 @@
-# **FRIKR** Como Flikr pero en versión freaky
+# **FRIKR** | ### **Como Flikr pero en versión freaky**
 * Basado en el curso de Django + Python & REST de KeepCoding 📌
 * Práctica de creación de aplicación web en Framework Django
 * Práctica de creación de API REST con Rest Framework Django
