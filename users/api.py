@@ -6,10 +6,14 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
+from users.permissions import UserPermission
 
 class UserListAPI(APIView):
 
+    permission_classes = (UserPermission,) # Agrega la nuestra clase creada a los permisos de restframework
+
     def get(self, request):
+        self.check_permissions(request)
         paginator = PageNumberPagination()  #instanciar paginador
         users = User.objects.all() # En users estará el queryset, no los objetos
         paginator.paginate_queryset(users, request) #paginar el queryset
@@ -19,6 +23,7 @@ class UserListAPI(APIView):
         return paginator.get_paginated_response(serialized_users)
 
     def post(self, request):
+        self.check_permissions(request)
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             new_user = serializer.save()
@@ -28,13 +33,19 @@ class UserListAPI(APIView):
 
 class UserDetailAPI(APIView):
 
+    permission_classes = (UserPermission,) # Agrega la nuestra clase creada a los permisos de restframework
+
     def get(self, request, pk):
+        self.check_permissions(request)
         user = get_object_or_404(User, pk=pk)
+        self.check_object_permissions(request, user)
         serializer = UserSerializer(user) #UserSerializer devuelve un diccionario en serializer.data
         return Response(serializer.data)
     
     def put(self, request, pk):
+        self.check_permissions(request) # Comprueba si el usuario puede hacer la acción
         user = get_object_or_404(User, pk=pk)
+        self.check_object_permissions(request, user) # Comprueba si el usuario puede hacer la acción sobre el objeto que ha elegido
         serializer = UserSerializer(instance=user, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -43,7 +54,9 @@ class UserDetailAPI(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, pk):
+        self.check_permissions(request)
         user = get_object_or_404(User, pk=pk)
+        self.check_object_permissions(request, user)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
