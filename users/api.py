@@ -5,14 +5,18 @@ from users.serializers import UserSerializer
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
 
 class UserListAPI(APIView):
 
     def get(self, request):
-        users = User.objects.all()
+        paginator = PageNumberPagination()  #instanciar paginador
+        users = User.objects.all() # En users estará el queryset, no los objetos
+        paginator.paginate_queryset(users, request) #paginar el queryset
         serializer = UserSerializer(users, many=True)  #many es necesario para cuando pasas más de un objeto
         serialized_users = serializer.data  #lista de diccionarios
-        return Response(serialized_users)
+        #devolver respuesta paginada
+        return paginator.get_paginated_response(serialized_users)
 
     def post(self, request):
         serializer = UserSerializer(data=request.data)
