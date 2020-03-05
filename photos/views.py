@@ -8,7 +8,6 @@ from django.views.generic import View, ListView
 from django.utils.decorators import method_decorator
 from django.db.models import Q
 
-
 class PhotosQueryset(object):
 
     def get_photos_queryset(self, request):
@@ -38,15 +37,6 @@ class DetailView(View, PhotosQueryset):
         :param request: HttpRequest
         :param pk: id de la foto
         :return: HttpResponse
-        """
-        """
-        También podemos utilizar esta sintaxis de recuperación de un objeto:
-        try:
-            photo = Photo.objects.get(pk=pk)
-        except Photo.DoesNotExist:
-            photo = None
-        except PhotoMultipleObjects:
-            photo = None
         """
         possible_photos = self.get_photos_queryset(request).filter(pk=pk).select_related('owner') #con 'select_related() añadimos al select de búsqueda en BBDD los campos que queremos traer para optimizar la query
         photo = possible_photos[0] if len(possible_photos) >= 1 else None
